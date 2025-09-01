@@ -26,7 +26,10 @@
 
 1. **Click Deploy Button** ⬆️ (2-3 minutes)
 2. **Set PASSWORD** in Railway variables  
-3. **Access** your app at `https://your-app.railway.app/ui`
+3. **Access** your app:
+   - 🎨 **UI**: `https://your-app.railway.app/ui` (login with admin/your-password)
+   - 📖 **API Docs**: `https://your-app.railway.app/docs`
+   - 🔧 **API Explorer**: `https://your-app.railway.app/scalar`
 
 ## 🔐 Authentication
 
