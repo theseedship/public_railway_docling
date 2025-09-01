@@ -5,8 +5,20 @@
 ## 🇬🇧 English
 [Docling](https://github.com/DS4SD/docling) is an AI framework for document processing (PDFs, images, PowerPoint, Word) with OCR, table extraction, and format conversion.
 
+**Why this Railway template?**
+- 🔑 **Ultra-simple password**: Just set PASSWORD - auto-encrypted, change anytime!
+- 🔐 **Built-in security**: Authentication + IP filtering ready
+- ⚡ **Optimized for Railway**: Model caching, Gzip compression, instant deploy
+- 💰 **Cost-effective**: Private network, no public exposure needed
+
 ## 🇫🇷 Français
 [Docling](https://github.com/DS4SD/docling) est un framework IA pour le traitement documentaire (PDF, images, PowerPoint, Word) avec OCR, extraction de tableaux et conversion de formats.
+
+**Pourquoi ce template Railway ?**
+- 🔑 **Mot de passe ultra-simple** : Définissez PASSWORD - chiffré automatiquement, changez quand vous voulez !
+- 🔐 **Sécurité intégrée** : Authentification + filtrage IP prêts
+- ⚡ **Optimisé pour Railway** : Cache des modèles, compression Gzip, déploiement instant
+- 💰 **Économique** : Réseau privé, pas d'exposition publique nécessaire
 
 ---
 
