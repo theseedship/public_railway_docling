@@ -1,0 +1,22 @@
+:8080 {
+    # Health check endpoint (no auth required)
+    @health {
+        path /health
+    }
+    handle @health {
+        respond "OK" 200
+    }
+    
+    # Ready check endpoint
+    @ready {
+        path /ready
+    }
+    handle @ready {
+        respond "Backend not configured yet" 503
+    }
+    
+    # Default response for all other requests
+    handle {
+        respond "Railway Docling Template - Service Running. Backend not yet configured." 200
+    }
+}

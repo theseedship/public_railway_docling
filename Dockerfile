@@ -1,10 +1,14 @@
 FROM caddy:2.10.0-alpine
 
-# Security: Use non-root user (caddy user is already created in base image)
-USER caddy
+# Note: The caddy user (UID 1001) already exists in the official caddy image
+# No need to switch user as Caddy drops privileges automatically
 
-# Copy configuration with proper ownership
-COPY --chown=caddy:caddy Caddyfile /etc/caddy/Caddyfile
+# Copy both Caddyfiles
+COPY --chown=1001:1001 Caddyfile.minimal /etc/caddy/Caddyfile.minimal
+COPY --chown=1001:1001 Caddyfile /etc/caddy/Caddyfile.full
+
+# Use minimal config by default
+COPY --chown=1001:1001 Caddyfile.minimal /etc/caddy/Caddyfile
 
 # Health check for Railway deployments
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
