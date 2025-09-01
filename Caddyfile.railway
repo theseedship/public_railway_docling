@@ -36,9 +36,8 @@
     }
     handle @ready {
         reverse_proxy docling-serve:5001 {
-            health_uri /health
-            health_interval 60s
-            health_timeout 5s
+            # Disable health checks to allow sleep mode
+            health_interval 0
         }
     }
     
@@ -61,7 +60,13 @@
         }
         
         reverse_proxy docling-serve:5001 {
+            # Disable health checks to allow sleep mode
+            health_interval 0
+        } {
             header_up X-Real-IP {remote_host}
+            
+            # Disable health checks to allow sleep mode
+            health_interval 0
         }
     }
     
@@ -76,7 +81,10 @@
         path /docs /docs/* /scalar /scalar/* /openapi.json /redoc /redoc/*
     }
     handle @docs {
-        reverse_proxy docling-serve:5001
+        reverse_proxy docling-serve:5001 {
+            # Disable health checks to allow sleep mode
+            health_interval 0
+        }
     }
     
     # UI endpoint with Basic Authentication
@@ -94,7 +102,10 @@
             Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: wss: https:; img-src * data: blob:; media-src * data: blob:;"
         }
         
-        reverse_proxy docling-serve:5001
+        reverse_proxy docling-serve:5001 {
+            # Disable health checks to allow sleep mode
+            health_interval 0
+        }
     }
     
     # Static files and assets for UI
@@ -102,7 +113,10 @@
         path /assets/* /static/* /_app/* /favicon.ico
     }
     handle @static {
-        reverse_proxy docling-serve:5001
+        reverse_proxy docling-serve:5001 {
+            # Disable health checks to allow sleep mode
+            health_interval 0
+        }
     }
     
     # WebSocket support for Gradio UI
@@ -111,7 +125,10 @@
         header Upgrade websocket
     }
     handle @websocket {
-        reverse_proxy docling-serve:5001
+        reverse_proxy docling-serve:5001 {
+            # Disable health checks to allow sleep mode
+            health_interval 0
+        }
     }
     
     # Root - redirect to docs
@@ -126,7 +143,13 @@
         }
         
         reverse_proxy docling-serve:5001 {
+            # Disable health checks to allow sleep mode
+            health_interval 0
+        } {
             header_up X-Real-IP {remote_host}
+            
+            # Disable health checks to allow sleep mode
+            health_interval 0
         }
     }
 }
