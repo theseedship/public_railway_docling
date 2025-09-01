@@ -1,324 +1,376 @@
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/docling-ocr-anything?referralCode=Z1xivh)
-[![Security Scan](https://github.com/yourusername/railway-docling-template/actions/workflows/security.yml/badge.svg)](https://github.com/yourusername/railway-docling-template/actions/workflows/security.yml)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://hub.docker.com/r/ds4sd/docling-serve)
+# 🚀 Railway Docling Template - AI Document Processing Made Easy
 
-# 🚀 Railway Docling OCR Template - Enterprise Ready
-
-Production-ready, secure deployment template for [Docling](https://github.com/DS4SD/docling) - a powerful document processing tool that parses PDFs, DOCX, PPTX, images, and audio files with advanced OCR capabilities, Visual Language Models, and ASR for audio transcription.
-
-## ✨ Features
-
-### 🔒 Enterprise Security
-- **Dual Authentication**: Bearer tokens for API, Basic Auth for UI
-- **Security Headers**: HSTS, CSP, X-Frame-Options, and more
-- **Rate Limiting**: Configurable per-endpoint and global limits
-- **Non-root Containers**: Enhanced container security
-- **Automated Security Scanning**: GitHub Actions workflows
-
-### 📄 Document Processing
-- **Multi-format Support**: PDF, DOCX, PPTX, images, audio files
-- **Advanced OCR**: Layout analysis, table extraction, formula recognition
-- **Visual Language Models**: Deep document understanding
-- **Audio Transcription**: ASR capabilities for audio files
-- **Export Options**: Markdown, HTML, JSON formats
-
-### 🏗️ Production Ready
-- **Health Checks**: Automated monitoring endpoints
-- **Zero-downtime Deployments**: Rolling updates with health validation
-- **Resource Management**: Configurable CPU/memory limits
-- **Logging & Monitoring**: Structured JSON logging
-- **Docker Compose**: Local development environment
-
-## 🚀 Quick Start
-
-### Deploy to Railway (Recommended)
+Transform any document into structured data with enterprise-grade security. This Railway template deploys [IBM's Docling](https://github.com/DS4SD/docling) - a powerful AI that can read PDFs, images, Word docs, PowerPoints, and even audio files with OCR, layout analysis, and transcription capabilities.
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/docling-ocr-anything?referralCode=Z1xivh)
 
-Click the button above and Railway will:
-1. Fork this repository to your GitHub account
-2. Deploy the services automatically
-3. Generate secure credentials
-4. Provide you with a public URL
+**Perfect for:** Document automation, content extraction, OCR workflows, data processing pipelines, and AI applications that need to understand documents.
 
-### Local Development
+## ✨ What Can This Do?
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/railway-docling-template.git
-   cd railway-docling-template
-   ```
+- **📄 Smart Document Processing**: PDFs, DOCX, PPTX, images, and audio files
+- **🔍 Advanced OCR**: Extract text, tables, formulas, and maintain layout structure  
+- **🎯 Export Formats**: Get results as Markdown, HTML, or JSON
+- **🔒 Enterprise Security**: Dual authentication, rate limiting, security headers
+- **🚀 Production Ready**: Health checks, monitoring, zero-downtime deployments
+- **💡 Easy UI**: Built-in web interface for drag-and-drop processing
 
-2. **Generate secure credentials**
-   ```bash
-   chmod +x scripts/generate-password.sh
-   ./scripts/generate-password.sh
-   ```
+## 🎯 Quick Start (1-2-3 Deploy!)
 
-3. **Create environment file**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your generated credentials
-   ```
+### Option 1: Deploy to Railway (Recommended)
 
-4. **Start services**
-   ```bash
-   docker-compose up -d
-   ```
+1. **Click the Deploy Button** ⬆️ (takes 2-3 minutes)
+2. **Railway automatically**:
+   - Forks this repo to your GitHub
+   - Generates secure passwords and API tokens
+   - Deploys with enterprise security enabled  
+   - Gives you a live URL
+3. **Start using it!** Visit your Railway URL and begin processing documents
 
-5. **Validate deployment**
-   ```bash
-   ./scripts/validate-deployment.sh --url http://localhost:8080
-   ```
+That's it! Railway handles all the complex setup for you.
 
-## 📖 Usage
-
-### API Authentication
-
-Call API endpoints with Bearer token authentication:
+### Option 2: Local Development
 
 ```bash
-# Set your token (get from Railway dashboard or .env file)
-export TOKEN="your-bearer-token-here"
+# Clone the repo
+git clone https://github.com/yourusername/railway-docling-template.git
+cd railway-docling-template
 
-# Upload and process a document
-curl -X POST https://your-app.railway.app/v1/convert \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@document.pdf" \
-  -F "output_format=markdown"
-```
-
-### UI Access
-
-1. Navigate to `https://your-app.railway.app/ui`
-2. Enter username and password (configured in environment variables)
-3. Use the Gradio interface for document processing
-
-### Documentation
-
-- **API Documentation**: `https://your-app.railway.app/docs`
-- **Interactive API**: `https://your-app.railway.app/scalar`
-- **OpenAPI Spec**: `https://your-app.railway.app/openapi.json`
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `CADDY_AUTHORIZATION` | Bearer token for API auth | Auto-generated | Yes |
-| `CADDY_USERNAME` | Basic auth username | `admin` | Yes |
-| `CADDY_PASSWORD_HASH` | Bcrypt password hash | - | Yes |
-| `ENABLE_IP_FILTER` | Enable IP filtering | `false` | No |
-| `ALLOWED_IPS` | IP allowlist (CIDR format) | `0.0.0.0/0` (all) | No |
-| `DOCLING_SERVE_ENABLE_UI` | Enable Gradio UI | `1` | No |
-| `LOG_LEVEL` | Logging verbosity | `INFO` | No |
-
-See [.env.example](.env.example) for complete configuration options.
-
-### Security Configuration
-
-#### Generate Credentials
-
-```bash
-# Interactive credential generator
+# Generate secure credentials (creates .env file)
 ./scripts/generate-password.sh
 
-# Options:
-# 1. Generate password hash only
-# 2. Generate API token only
-# 3. Generate both (recommended)
-# 4. Generate random password with hash
-```
-
-#### Rate Limiting
-
-Default rate limits (configurable in Caddyfile):
-- **Global**: 1000 requests/minute
-- **API per IP**: 100 requests/minute
-- **Docs per IP**: 30 requests/minute
-
-#### Security Headers
-
-All responses include:
-- HSTS with preloading
-- CSP policy
-- X-Frame-Options: DENY
-- X-Content-Type-Options: nosniff
-- Custom Referrer and Permissions policies
-
-## 📊 Monitoring
-
-### Health Checks
-
-- **Basic Health**: `GET /health` - Returns 200 if Caddy is running
-- **Ready Check**: `GET /ready` - Validates backend connectivity
-- **Metrics**: Available via Caddy's metrics endpoint
-
-### Logging
-
-Structured JSON logging to stdout with configurable levels:
-- `DEBUG`: Verbose debugging information
-- `INFO`: Standard operational logs
-- `WARN`: Warning messages
-- `ERROR`: Error conditions
-
-### Validation Script
-
-Run comprehensive deployment validation:
-
-```bash
-./scripts/validate-deployment.sh \
-  --url https://your-app.railway.app \
-  --token your-api-token
-```
-
-## 🛡️ Security
-
-This template implements enterprise-grade security. See [SECURITY.md](SECURITY.md) for:
-- Security features and best practices
-- Vulnerability reporting process
-- Compliance standards
-- Security audit checklist
-
-### Key Security Features
-
-1. **Authentication**: Dual-layer with Bearer tokens and Basic Auth
-2. **Container Security**: Non-root user, Alpine base, read-only configs
-3. **Network Security**: Rate limiting, security headers, CORS control
-4. **Automated Scanning**: Daily vulnerability scans via GitHub Actions
-
-## 🧪 Testing
-
-### Local Testing
-
-```bash
-# Run security validation
+# Start everything  
 docker-compose up -d
-./scripts/validate-deployment.sh
 
-# Run specific tests
-docker-compose exec caddy caddy validate --config /etc/caddy/Caddyfile
+# Validate it's working
+./scripts/validate-deployment.sh --url http://localhost:8080
 ```
 
-### CI/CD Pipeline
+## 🔐 First Time Setup & Authentication
 
-GitHub Actions workflows included:
-- **Security scanning**: Container vulnerabilities, dependencies, secrets
-- **Configuration validation**: Syntax checking, security headers
-- **Automated testing**: Health checks, authentication, rate limiting
+When Railway deploys your app, you'll get **two ways to access it**:
 
-## 📚 API Examples
+### 🌐 Web Interface (Easy Start)
+1. Go to `https://your-app-name.railway.app/ui`
+2. Login with:
+   - **Username**: `admin` 
+   - **Password**: Check your Railway environment variables for `CADDY_PASSWORD_HASH` - [see auth troubleshooting](#-authentication-troubleshooting) below
 
-### Convert PDF to Markdown
-
+### 🔌 API Access (For Developers)
 ```bash
-curl -X POST https://your-app.railway.app/v1/convert \
+# Get your API token from Railway dashboard (CADDY_AUTHORIZATION variable)
+export TOKEN="your-api-token-here"
+
+# Process a document
+curl -X POST https://your-app-name.railway.app/v1/convert \
   -H "Authorization: Bearer $TOKEN" \
   -F "file=@document.pdf" \
   -F "output_format=markdown"
 ```
 
-### Process Image with OCR
+## 🆘 Authentication Troubleshooting
+
+**Problem**: Can't login to `/ui`?
+
+**Solution**: You need the actual password, not the password hash!
+
+1. **Quick Fix**: Try these common passwords with username `admin`:
+   - `changeme123`
+   - `admin` 
+   - `password`
+   - `docling`
+
+2. **Set New Password**: 
+   ```bash
+   # Generate a password hash for "mynewpassword"
+   echo "mynewpassword" | docker run -i --rm caddy:alpine caddy hash-password
+   
+   # Copy the output hash to Railway's CADDY_PASSWORD_HASH variable
+   # Then login with username: admin, password: mynewpassword
+   ```
+
+3. **Generate Random Password**: Use the script to create secure credentials:
+   ```bash
+   ./scripts/generate-password.sh  # Choose option 4
+   ```
+
+**Remember**: The hash goes in the environment variable, the actual password is what you type when logging in!
+
+## 📖 How to Use Your Document Processor
+
+### Web Interface (Beginner-Friendly)
+1. Visit `https://your-app-name.railway.app/ui`
+2. Login with your credentials  
+3. Upload any document (PDF, Word, image, etc.)
+4. Choose output format (Markdown, HTML, JSON)
+5. Click process and download results!
+
+### API Examples (Developer-Friendly)
 
 ```bash
-curl -X POST https://your-app.railway.app/v1/ocr \
+# Convert PDF to Markdown
+curl -X POST https://your-app-name.railway.app/v1/convert \
   -H "Authorization: Bearer $TOKEN" \
-  -F "image=@scan.jpg"
+  -F "file=@report.pdf" \
+  -F "output_format=markdown"
+
+# Extract text from image with OCR  
+curl -X POST https://your-app-name.railway.app/v1/convert \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@scanned-doc.jpg" \
+  -F "output_format=json"
+
+# Process PowerPoint presentation
+curl -X POST https://your-app-name.railway.app/v1/convert \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@presentation.pptx" \
+  -F "output_format=html"
 ```
 
-### Extract Tables from Document
+### Explore the APIs
+- **Interactive Docs**: `https://your-app-name.railway.app/docs`
+- **API Explorer**: `https://your-app-name.railway.app/scalar`  
+- **OpenAPI Spec**: `https://your-app-name.railway.app/openapi.json`
 
+## ⚙️ Configuration & Customization
+
+Your Railway app is configured through environment variables. Here are the key ones:
+
+| Setting | Variable | Description | Default |
+|---------|----------|-------------|---------|
+| API Token | `CADDY_AUTHORIZATION` | Bearer token for API access | Auto-generated |
+| Username | `CADDY_USERNAME` | Login username for `/ui` | `admin` |
+| Password | `CADDY_PASSWORD_HASH` | Hashed password for `/ui` | Auto-generated |
+| UI Enable | `DOCLING_SERVE_ENABLE_UI` | Show web interface | `1` (enabled) |
+| Logging | `LOG_LEVEL` | How much to log | `INFO` |
+
+### Optional Security Features
+
+**IP Allowlist**: Restrict access to specific IPs
+```env
+ENABLE_IP_FILTER=true
+ALLOWED_IPS=192.168.1.0/24,10.0.0.5/32
+```
+
+**Custom Rate Limits**: Prevent abuse
+```env  
+RATE_LIMIT_GLOBAL=1000       # Requests per minute globally
+RATE_LIMIT_API_PER_IP=100    # API requests per IP per minute
+RATE_LIMIT_DOCS_PER_IP=30    # Docs requests per IP per minute
+```
+
+## 🚀 Railway-Specific Optimizations
+
+### Serverless Performance Tips
+
+**ML Model Caching**: Add these volumes in Railway dashboard to avoid re-downloading AI models:
+```
+Volume Mount Points:
+- /app/models → docling-models  
+- /app/cache → docling-cache
+```
+
+**Benefits**: First start ~137s (downloads models), subsequent starts ~10s (uses cache)
+
+**Models Cached**: LayoutLM (~500MB), TableFormer (~200MB), OCR models (~100MB)
+
+### Cost Optimization
+- **Gzip enabled**: Reduces bandwidth by ~70%
+- **Health checks**: Bypass auth for monitoring
+- **Resource limits**: Prevents runaway costs
+- **Private networking**: Use Railway's internal URLs between services
+
+## 🛡️ Security Features (Enterprise Grade)
+
+This template includes comprehensive security out of the box:
+
+### Authentication Layers
+- **API Endpoints** (`/v1/*`): Bearer token authentication
+- **Web Interface** (`/ui`): Username/password with bcrypt hashing
+- **Admin Routes**: Protected by basic auth
+
+### Security Headers
+Every response includes:
+- **HSTS**: Forces HTTPS with 1-year expiry
+- **CSP**: Prevents code injection attacks  
+- **X-Frame-Options**: Blocks clickjacking
+- **X-Content-Type-Options**: Prevents MIME sniffing
+
+### Rate Limiting
+- **Global**: 1000 requests/minute
+- **Per-IP API**: 100 requests/minute  
+- **Documentation**: 30 requests/minute per IP
+
+### Container Security  
+- **Non-root user**: Containers run unprivileged
+- **Alpine Linux**: Minimal attack surface
+- **Read-only configs**: Configuration files protected
+- **Resource constraints**: CPU/memory limits enforced
+
+## 🔧 Troubleshooting Common Issues
+
+### "Unauthorized" API Errors
 ```bash
-curl -X POST https://your-app.railway.app/v1/extract/tables \
-  -H "Authorization: Bearer $TOKEN" \
-  -F "file=@report.pdf"
+# ❌ Wrong: Missing Bearer token
+curl https://your-app.railway.app/v1/convert
+
+# ✅ Correct: Include Authorization header
+curl -H "Authorization: Bearer YOUR_TOKEN" https://your-app.railway.app/v1/convert
 ```
 
-## 🤝 Contributing
+### "Rate Limited" Errors
+- **Cause**: Too many requests too quickly
+- **Solution**: Add delays between requests or increase limits in environment variables
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+### "File Too Large" Errors  
+- **Default Limit**: 100MB for documents, 50MB for API
+- **Solution**: Adjust `MAX_REQUEST_SIZE_DOCS` environment variable
 
-1. Fork the repository
-2. Create a feature branch
+### App Won't Start
+1. Check Railway logs for startup errors
+2. Verify environment variables are set
+3. Run validation script: `./scripts/validate-deployment.sh --url https://your-app.railway.app`
+
+### Models Keep Re-downloading
+- **Problem**: No persistent volumes configured
+- **Solution**: Add volume mounts in Railway dashboard (see [optimization section](#railway-specific-optimizations))
+
+## 📊 Monitoring Your Deployment
+
+### Health Endpoints
+- **Basic Health**: `GET /health` (returns 200 if running)
+- **Detailed Status**: `GET /ready` (validates backend connectivity)
+- **Metrics**: Available via Caddy's built-in metrics
+
+### What to Monitor
+- **Failed logins**: High numbers may indicate attack
+- **Rate limit hits**: May need to adjust limits  
+- **Response times**: Should be under 5 seconds
+- **Error rates**: Keep 4xx under 10%, 5xx under 5%
+
+### Logs Access
+View logs in Railway dashboard or via CLI:
+```bash
+railway logs --follow
+```
+
+## 🧪 Testing Your Setup
+
+### Quick Validation
+```bash
+# Download validation script
+curl -O https://raw.githubusercontent.com/yourusername/railway-docling-template/main/scripts/validate-deployment.sh
+
+# Test your deployment
+chmod +x validate-deployment.sh  
+./validate-deployment.sh --url https://your-app-name.railway.app --token your-api-token
+```
+
+### Manual Tests
+```bash
+# Test health endpoint
+curl https://your-app-name.railway.app/health
+
+# Test authentication  
+curl -u admin:your-password https://your-app-name.railway.app/ui
+
+# Test API with a small file
+curl -X POST https://your-app-name.railway.app/v1/convert \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@small-test.pdf" \
+  -F "output_format=json"
+```
+
+## 🔄 Updates & Maintenance
+
+### Regular Maintenance
+- **Weekly**: Review authentication logs in Railway dashboard
+- **Monthly**: Rotate API tokens (`CADDY_AUTHORIZATION`)
+- **Quarterly**: Update passwords (`CADDY_PASSWORD_HASH`)
+
+### Updating the Template
+Railway automatically deploys when you push changes to your forked repo. The template includes:
+- **Automated security scanning**: Checks for vulnerabilities
+- **Health validation**: Ensures updates don't break functionality  
+- **Rolling deployments**: Zero-downtime updates
+
+## 📚 API Reference
+
+### Document Conversion Endpoint
+```http
+POST /v1/convert
+Authorization: Bearer YOUR_TOKEN
+Content-Type: multipart/form-data
+
+Parameters:
+- file: Document file (PDF, DOCX, PPTX, images, audio)
+- output_format: markdown | html | json
+- extract_tables: true | false (optional)
+- extract_images: true | false (optional)
+```
+
+### Health Check Endpoints
+```http
+GET /health          # Basic health (always returns 200 if running)
+GET /ready           # Detailed health (validates backend)
+GET /metrics         # Prometheus metrics (if enabled)
+```
+
+### Response Formats
+```json
+{
+  "status": "success",
+  "document_type": "pdf",
+  "pages": 5,
+  "content": "...",
+  "tables": [...],
+  "images": [...]
+}
+```
+
+## 🤝 Support & Contributing
+
+### Getting Help
+- **📖 Documentation**: Full docs in this repository's wiki
+- **🐛 Bug Reports**: [Create GitHub issue](https://github.com/yourusername/railway-docling-template/issues)
+- **💬 Questions**: Use GitHub Discussions
+- **🚂 Railway Help**: [Railway Documentation](https://docs.railway.app)
+
+### Contributing
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Run security validation
+4. Run security validation (`./scripts/validate-deployment.sh`)
 5. Submit a pull request
 
-## 📝 License
+### Reporting Security Issues
+🚨 **Do not create public issues for security vulnerabilities**
 
-This template is MIT licensed. See [LICENSE](LICENSE) file for details.
+Email security details to: security@yourdomain.com
 
-Docling is licensed under [MIT License](https://github.com/DS4SD/docling/blob/main/LICENSE).
+We'll respond within 48 hours and work to resolve critical issues within 7 days.
 
-## 🆘 Support
+## 📄 License & Credits
 
-- **Documentation**: [Full documentation](https://github.com/yourusername/railway-docling-template/wiki)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/railway-docling-template/issues)
-- **Security**: See [SECURITY.md](SECURITY.md) for reporting vulnerabilities
-- **Railway Support**: [Railway Documentation](https://docs.railway.app)
+This template is MIT licensed - see [LICENSE](LICENSE) file for details.
 
-## 🚀 Railway Serverless Optimization
-
-### Volume Configuration for ML Models
-
-For serverless deployments, configure persistent volumes to cache ML models and avoid re-downloading on each cold start:
-
-```yaml
-# In Railway dashboard, add these volumes to docling-serve:
-volumes:
-  - mount: /app/models
-    name: docling-models
-  - mount: /app/cache
-    name: docling-cache
-```
-
-This caches:
-- **LayoutLM models** (~500MB) - Document layout analysis
-- **TableFormer models** (~200MB) - Table extraction
-- **OCR models** (~100MB) - Text recognition
-- **Processed documents** - Faster re-processing
-
-**First start**: ~137 seconds (model download)  
-**Subsequent starts**: ~10 seconds (models cached)
-
-### IP Filtering
-
-Restrict access to specific IP addresses:
-
-```bash
-# Enable IP filtering
-ENABLE_IP_FILTER=true
-# Allow specific IPs (CIDR format)
-ALLOWED_IPS="192.168.1.0/24,10.0.0.5/32"
-```
-
-### Performance Features
-
-- **Gzip Compression**: Enabled by default (reduces payload by ~70%)
-- **HTTP/2**: Enabled for multiplexing
-- **Health checks**: Bypass authentication for monitoring
-
-## 🎯 Roadmap
-
-- [ ] JWT token authentication support
-- [ ] Multi-tenant isolation
-- [ ] S3/Cloud storage integration
-- [ ] Webhook notifications
-- [ ] Advanced queue management
-- [ ] Prometheus metrics endpoint
-- [ ] OpenTelemetry tracing
-
-## 🏆 Credits
-
-- [Docling](https://github.com/DS4SD/docling) by IBM Research
-- [Caddy](https://caddyserver.com) for reverse proxy
-- [Railway](https://railway.app) for hosting platform
+**Built with**:
+- [Docling](https://github.com/DS4SD/docling) by IBM Research (Document AI)
+- [Caddy](https://caddyserver.com) (Reverse proxy & security)
+- [Railway](https://railway.app) (Hosting platform)
 
 ---
 
-**Version**: 1.0.0 | **Last Updated**: January 2024
+## 🎯 What's Next?
 
-Made with ❤️ for the Railway community
+After deploying your Docling service:
+
+1. **🧪 Test it**: Upload a PDF to `/ui` and see the magic happen
+2. **🔌 Integrate**: Use the API in your applications
+3. **📈 Scale**: Railway auto-scales based on usage  
+4. **🛡️ Secure**: Review security settings for your use case
+5. **📊 Monitor**: Set up alerts for your application
+
+**Made with ❤️ for the Railway community**
+
+Version 1.0.0 | [View on GitHub](https://github.com/yourusername/railway-docling-template) | [Deploy to Railway](https://railway.com/new/template/docling-ocr-anything?referralCode=Z1xivh)
