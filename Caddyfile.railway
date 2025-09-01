@@ -1,0 +1,119 @@
+:{$PORT:8080} {
+    # Security Headers
+    header {
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # Health check endpoint (no auth required)
+    @health {
+        path /health
+    }
+    handle @health {
+        respond "OK" 200
+    }
+    
+    # Ready check endpoint
+    @ready {
+        path /ready
+    }
+    handle @ready {
+        reverse_proxy docling-serve:5001 {
+            health_uri /health
+            health_interval 10s
+            health_timeout 5s
+        }
+    }
+    
+    # API v1 endpoints with Bearer token authentication
+    @api_v1 {
+        path /v1/*
+    }
+    
+    @api_auth {
+        header Authorization "Bearer {$CADDY_AUTHORIZATION}"
+        path /v1/*
+    }
+    
+    # Handle authenticated API requests
+    handle @api_auth {
+        header {
+            X-Content-Type-Options "nosniff"
+            X-API-Version "1.0"
+            Cache-Control "no-store, no-cache, must-revalidate, private"
+        }
+        
+        reverse_proxy docling-serve:5001 {
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+    
+    # Reject unauthorized API requests
+    handle @api_v1 {
+        header Content-Type "application/json"
+        respond `{"error": "unauthorized", "message": "Invalid or missing Bearer token in Authorization header"}` 401
+    }
+    
+    # Documentation endpoints (public access)
+    @docs {
+        path /docs /docs/* /scalar /scalar/* /openapi.json /redoc /redoc/*
+    }
+    handle @docs {
+        reverse_proxy docling-serve:5001
+    }
+    
+    # UI endpoint with Basic Authentication
+    @ui {
+        path /ui /ui/*
+    }
+    handle @ui {
+        basicauth {
+            {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
+        }
+        
+        # UI-specific headers for Gradio
+        header {
+            X-Frame-Options "SAMEORIGIN"
+            Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: wss: https:; img-src * data: blob:; media-src * data: blob:;"
+        }
+        
+        reverse_proxy docling-serve:5001
+    }
+    
+    # Static files and assets for UI
+    @static {
+        path /assets/* /static/* /_app/* /favicon.ico
+    }
+    handle @static {
+        reverse_proxy docling-serve:5001
+    }
+    
+    # WebSocket support for Gradio UI
+    @websocket {
+        header Connection *Upgrade*
+        header Upgrade websocket
+    }
+    handle @websocket {
+        reverse_proxy docling-serve:5001
+    }
+    
+    # Root - redirect to docs
+    handle / {
+        redir /docs permanent
+    }
+    
+    # All other endpoints with Basic Authentication
+    handle {
+        basicauth {
+            {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
+        }
+        
+        reverse_proxy docling-serve:5001 {
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+}
