@@ -15,14 +15,14 @@ if [ -n "$PASSWORD" ] && [ -z "$CADDY_PASSWORD_HASH" ]; then
     export CADDY_PASSWORD_HASH
     
     echo "✅ Password hash generated successfully"
-    echo "ℹ️  To change password in the future: delete CADDY_PASSWORD_HASH and set a new PASSWORD"
+    echo "ℹ️  To change password: just update PASSWORD and redeploy"
     
 elif [ -n "$CADDY_PASSWORD_HASH" ]; then
     # Hash exists, use it (even if PASSWORD is defined)
     echo "🔒 Using existing CADDY_PASSWORD_HASH"
     if [ -n "$PASSWORD" ]; then
         echo "ℹ️  Note: PASSWORD is set but ignored because CADDY_PASSWORD_HASH exists"
-        echo "ℹ️  To use PASSWORD: delete or empty CADDY_PASSWORD_HASH variable"
+        echo "ℹ️  To use the new PASSWORD: remove CADDY_PASSWORD_HASH from Railway variables"
     fi
     
 elif [ -n "$PASSWORD" ]; then

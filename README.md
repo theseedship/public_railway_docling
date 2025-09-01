@@ -54,8 +54,8 @@ curl -X POST https://your-app.railway.app/v1/convert \
 | `ALLOWED_IPS` | Allowed IP ranges | `0.0.0.0/0` |
 
 ### Password Management
-**🇬🇧 Change password:** Delete `CADDY_PASSWORD_HASH` → Set new `PASSWORD` → Redeploy  
-**🇫🇷 Changer mot de passe:** Supprimez `CADDY_PASSWORD_HASH` → Définissez `PASSWORD` → Redéployez
+**🇬🇧 Change password:** Just update `PASSWORD` → Redeploy  
+**🇫🇷 Changer mot de passe:** Modifiez `PASSWORD` → Redéployez
 
 ## 🚀 Railway Optimization
 

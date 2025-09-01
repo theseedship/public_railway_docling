@@ -13,8 +13,8 @@
   },
   "variables": {
     "PASSWORD": {
-      "description": "Password for Basic Auth UI access (will be hashed automatically). To change: delete CADDY_PASSWORD_HASH and set new PASSWORD",
-      "required": false
+      "description": "Password for Basic Auth UI access. To change: just update this value and redeploy",
+      "required": true
     },
     "CADDY_AUTHORIZATION": {
       "description": "Bearer token for API authentication (/v1/* endpoints). Generate with: openssl rand -hex 32",
