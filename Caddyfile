@@ -13,6 +13,9 @@
         respond "Unauthorized" 401
     }
     route {
+        basicauth {
+            {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
+        }
         reverse_proxy docling:5001
     }
 }
