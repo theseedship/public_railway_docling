@@ -7,7 +7,7 @@
         path /v1/*
     }
     route @auth {
-        reverse_proxy docling:5001
+        reverse_proxy docling-serve:5001
     }
     route @v1 {
         respond "Unauthorized" 401
@@ -16,6 +16,6 @@
         basicauth {
             {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
         }
-        reverse_proxy docling:5001
+        reverse_proxy docling-serve:5001
     }
 }
