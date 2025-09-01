@@ -111,6 +111,8 @@ curl -X POST https://your-app.railway.app/v1/convert \
 | `CADDY_AUTHORIZATION` | Bearer token for API auth | Auto-generated | Yes |
 | `CADDY_USERNAME` | Basic auth username | `admin` | Yes |
 | `CADDY_PASSWORD_HASH` | Bcrypt password hash | - | Yes |
+| `ENABLE_IP_FILTER` | Enable IP filtering | `false` | No |
+| `ALLOWED_IPS` | IP allowlist (CIDR format) | `0.0.0.0/0` (all) | No |
 | `DOCLING_SERVE_ENABLE_UI` | Enable Gradio UI | `1` | No |
 | `LOG_LEVEL` | Logging verbosity | `INFO` | No |
 
@@ -257,6 +259,47 @@ Docling is licensed under [MIT License](https://github.com/DS4SD/docling/blob/ma
 - **Issues**: [GitHub Issues](https://github.com/yourusername/railway-docling-template/issues)
 - **Security**: See [SECURITY.md](SECURITY.md) for reporting vulnerabilities
 - **Railway Support**: [Railway Documentation](https://docs.railway.app)
+
+## 🚀 Railway Serverless Optimization
+
+### Volume Configuration for ML Models
+
+For serverless deployments, configure persistent volumes to cache ML models and avoid re-downloading on each cold start:
+
+```yaml
+# In Railway dashboard, add these volumes to docling-serve:
+volumes:
+  - mount: /app/models
+    name: docling-models
+  - mount: /app/cache
+    name: docling-cache
+```
+
+This caches:
+- **LayoutLM models** (~500MB) - Document layout analysis
+- **TableFormer models** (~200MB) - Table extraction
+- **OCR models** (~100MB) - Text recognition
+- **Processed documents** - Faster re-processing
+
+**First start**: ~137 seconds (model download)  
+**Subsequent starts**: ~10 seconds (models cached)
+
+### IP Filtering
+
+Restrict access to specific IP addresses:
+
+```bash
+# Enable IP filtering
+ENABLE_IP_FILTER=true
+# Allow specific IPs (CIDR format)
+ALLOWED_IPS="192.168.1.0/24,10.0.0.5/32"
+```
+
+### Performance Features
+
+- **Gzip Compression**: Enabled by default (reduces payload by ~70%)
+- **HTTP/2**: Enabled for multiplexing
+- **Health checks**: Bypass authentication for monitoring
 
 ## 🎯 Roadmap
 

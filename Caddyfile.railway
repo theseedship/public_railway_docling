@@ -1,10 +1,25 @@
 :{$PORT:8080} {
+    # Enable Gzip compression for better performance
+    encode gzip {
+        minimum_length 1000
+    }
+    
     # Security Headers
     header {
         X-Frame-Options "DENY"
         X-Content-Type-Options "nosniff"
         X-XSS-Protection "1; mode=block"
         Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # IP Allowlist (optional - controlled by ENABLE_IP_FILTER)
+    @blocked {
+        expression `"{$ENABLE_IP_FILTER:false}" == "true"`
+        not remote_ip {$ALLOWED_IPS:0.0.0.0/0}
+        not path /health /ready
+    }
+    handle @blocked {
+        respond "Access Denied" 403
     }
     
     # Health check endpoint (no auth required)
