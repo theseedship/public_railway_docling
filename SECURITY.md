@@ -49,7 +49,7 @@ Three-tier rate limiting strategy:
 We take security seriously. If you discover a security vulnerability, please:
 
 1. **DO NOT** create a public GitHub issue
-2. Email security details to: [security@yourdomain.com]
+2. Create a [Private Security Advisory](https://github.com/theseedship/public_railway_docling/security/advisories/new)
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce
@@ -205,9 +205,9 @@ Track security-related changes:
 
 ## 📞 Security Contacts
 
-- **Security Team**: security@yourdomain.com
-- **Emergency Hotline**: +1-XXX-XXX-XXXX
-- **Bug Bounty Program**: https://yourdomain.com/security/bug-bounty
+- **Security Advisories**: [GitHub Security Advisory](https://github.com/theseedship/public_railway_docling/security/advisories/new)
+- **Issues**: [GitHub Issues](https://github.com/theseedship/public_railway_docling/issues)
+- **Railway Support**: [Railway Documentation](https://docs.railway.app)
 
 ---
 
