@@ -111,33 +111,31 @@ curl -X POST https://your-app-name.railway.app/v1/convert \
   -F "output_format=markdown"
 ```
 
-## 🆘 Authentication Troubleshooting
+## 🆘 Authentication Troubleshooting / Dépannage
 
-**Problem**: Can't login to `/ui`?
+### 🇬🇧 Can't login to `/ui`?
 
-**Solution**: You need the actual password, not the password hash!
+**Simplest solution**: Just set `PASSWORD` in Railway variables!
+1. Go to Railway dashboard → Variables
+2. Add: `PASSWORD=your-password-here`
+3. Redeploy → the hash is generated automatically
+4. Login with: username `admin`, password `your-password-here`
 
-1. **Quick Fix**: Try these common passwords with username `admin`:
-   - `changeme123`
-   - `admin` 
-   - `password`
-   - `docling`
+**If you already have a `CADDY_PASSWORD_HASH`**:
+- Either delete it and use `PASSWORD` instead (easier!)
+- Or remember the password you used to create that hash
 
-2. **Set New Password**: 
-   ```bash
-   # Generate a password hash for "mynewpassword"
-   echo "mynewpassword" | docker run -i --rm caddy:alpine caddy hash-password
-   
-   # Copy the output hash to Railway's CADDY_PASSWORD_HASH variable
-   # Then login with username: admin, password: mynewpassword
-   ```
+### 🇫🇷 Impossible de se connecter à `/ui` ?
 
-3. **Generate Random Password**: Use the script to create secure credentials:
-   ```bash
-   ./scripts/generate-password.sh  # Choose option 4
-   ```
+**Solution la plus simple** : Définissez juste `PASSWORD` dans les variables Railway !
+1. Allez dans Railway dashboard → Variables
+2. Ajoutez : `PASSWORD=votre-mot-de-passe`
+3. Redéployez → le hash est généré automatiquement
+4. Connectez-vous avec : nom d'utilisateur `admin`, mot de passe `votre-mot-de-passe`
 
-**Remember**: The hash goes in the environment variable, the actual password is what you type when logging in!
+**Si vous avez déjà un `CADDY_PASSWORD_HASH`** :
+- Soit supprimez-le et utilisez `PASSWORD` à la place (plus simple !)
+- Soit rappelez-vous du mot de passe utilisé pour créer ce hash
 
 ## 📖 How to Use Your Document Processor
 
