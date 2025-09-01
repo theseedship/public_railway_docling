@@ -1,12 +1,10 @@
 FROM caddy:2-alpine
 
-# Copy all Caddyfile variants
-COPY Caddyfile.minimal /etc/caddy/Caddyfile.minimal
-COPY Caddyfile.standalone /etc/caddy/Caddyfile.standalone
+# Copy production-ready configurations
 COPY Caddyfile.railway /etc/caddy/Caddyfile.railway
-COPY Caddyfile /etc/caddy/Caddyfile.full
+COPY Caddyfile /etc/caddy/Caddyfile.production
 
-# Use Railway config by default (connects to docling-serve)
+# Use Railway config by default (optimized for Railway platform)
 COPY Caddyfile.railway /etc/caddy/Caddyfile
 
 EXPOSE 8080
