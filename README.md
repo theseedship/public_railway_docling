@@ -204,10 +204,17 @@ Your Railway app is configured through environment variables. Here are the key o
 3. **Définissez/mettez à jour** `PASSWORD` avec votre nouveau mot de passe
 4. Redéployez → le hash est généré automatiquement !
 
-**How it works / Comment ça marche :**
-- `PASSWORD` only / seul → generates hash at startup / génère le hash au démarrage
-- `CADDY_PASSWORD_HASH` only / seul → uses existing hash / utilise le hash existant
-- Both / Les deux → hash takes priority / le hash a la priorité
+**🇬🇧 How password management works:**
+The system uses two variables: `PASSWORD` (plain text) and `CADDY_PASSWORD_HASH` (encrypted hash).
+- When you set `PASSWORD`, the system automatically generates the secure hash at startup
+- If `CADDY_PASSWORD_HASH` exists, it takes priority (safety mechanism to prevent accidental changes)
+- To change password: delete the hash variable, set new PASSWORD, and redeploy
+
+**🇫🇷 Comment fonctionne la gestion des mots de passe :**
+Le système utilise deux variables : `PASSWORD` (texte clair) et `CADDY_PASSWORD_HASH` (hash chiffré).
+- Quand vous définissez `PASSWORD`, le système génère automatiquement le hash sécurisé au démarrage
+- Si `CADDY_PASSWORD_HASH` existe, il a la priorité (mécanisme de sécurité contre les changements accidentels)
+- Pour changer : supprimez la variable hash, définissez le nouveau PASSWORD, et redéployez
 
 ### Optional Security Features
 
