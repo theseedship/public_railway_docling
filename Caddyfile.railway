@@ -60,11 +60,7 @@
         }
         
         reverse_proxy docling-serve:5001 {
-            # Disable health checks to allow sleep mode
-            health_interval 0
-        } {
             header_up X-Real-IP {remote_host}
-            
             # Disable health checks to allow sleep mode
             health_interval 0
         }
@@ -143,11 +139,7 @@
         }
         
         reverse_proxy docling-serve:5001 {
-            # Disable health checks to allow sleep mode
-            health_interval 0
-        } {
             header_up X-Real-IP {remote_host}
-            
             # Disable health checks to allow sleep mode
             health_interval 0
         }
