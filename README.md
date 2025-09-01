@@ -9,7 +9,8 @@
 - 🔑 **Ultra-simple password**: Just set PASSWORD - auto-encrypted, change anytime!
 - 🔐 **Built-in security**: Authentication + IP filtering ready
 - ⚡ **Optimized for Railway**: Model caching, Gzip compression, instant deploy
-- 💰 **Cost-effective**: Private network, no public exposure needed
+- 😴 **Sleep mode ready**: Auto-sleeps when idle, wakes in ~10s with cached models
+- 💰 **Cost-effective**: Pay only when active, private network included
 
 ## 🇫🇷 Français
 [Docling](https://github.com/DS4SD/docling) est un framework IA pour le traitement documentaire (PDF, images, PowerPoint, Word) avec OCR, extraction de tableaux et conversion de formats.
@@ -18,7 +19,8 @@
 - 🔑 **Mot de passe ultra-simple** : Définissez PASSWORD - chiffré automatiquement, changez quand vous voulez !
 - 🔐 **Sécurité intégrée** : Authentification + filtrage IP prêts
 - ⚡ **Optimisé pour Railway** : Cache des modèles, compression Gzip, déploiement instant
-- 💰 **Économique** : Réseau privé, pas d'exposition publique nécessaire
+- 😴 **Mode veille intelligent** : S'endort automatiquement, réveil en ~10s avec modèles en cache
+- 💰 **Économique** : Payez uniquement à l'usage, réseau privé inclus
 
 ---
 
