@@ -1,0 +1,112 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3,
+    "region": "us-west1",
+    "environmentVariables": {
+      "CADDY_AUTHORIZATION": {
+        "description": "Bearer token for API authentication. Auto-generated if not set.",
+        "default": "{{RAILWAY_STATIC_URL | replace 'https://' '' | replace '.up.railway.app' '' | sha256}}",
+        "required": true
+      },
+      "CADDY_USERNAME": {
+        "description": "Username for Basic Authentication on UI and non-API endpoints",
+        "default": "admin",
+        "required": true
+      },
+      "CADDY_PASSWORD_HASH": {
+        "description": "Bcrypt hash of the password for Basic Authentication. Generate with: docker run -it caddy:alpine caddy hash-password",
+        "default": "$2a$14$Zkx19XLiW6VYouLHR5NmfOFU0z2GTNmpkT/5qqR7hx4IjWJPDhjvG",
+        "required": true
+      },
+      "LOG_LEVEL": {
+        "description": "Logging level (DEBUG, INFO, WARN, ERROR)",
+        "default": "INFO",
+        "required": false
+      },
+      "DOCLING_SERVE_ENABLE_UI": {
+        "description": "Enable Gradio UI at /ui endpoint (1 to enable, 0 to disable)",
+        "default": "1",
+        "required": false
+      },
+      "PORT": {
+        "description": "Port for the Caddy server (Railway will set this automatically)",
+        "default": "8080",
+        "required": false
+      }
+    }
+  },
+  "services": [
+    {
+      "name": "caddy",
+      "icon": "🔒",
+      "source": {
+        "type": "github",
+        "repo": "yourusername/railway-docling-template"
+      },
+      "deploy": {
+        "numReplicas": 1,
+        "region": "us-west1",
+        "healthcheckPath": "/health",
+        "healthcheckTimeout": 300
+      },
+      "domains": {
+        "production": {
+          "customDomain": null,
+          "railwayProvidedDomain": true
+        }
+      }
+    },
+    {
+      "name": "docling-serve",
+      "icon": "📄",
+      "source": {
+        "type": "image",
+        "image": "ds4sd/docling-serve:latest"
+      },
+      "deploy": {
+        "numReplicas": 1,
+        "region": "us-west1",
+        "private": true,
+        "environmentVariables": {
+          "ENABLE_UI": {
+            "value": "${{DOCLING_SERVE_ENABLE_UI}}"
+          },
+          "PORT": {
+            "value": "5001"
+          }
+        }
+      },
+      "networking": {
+        "internalPort": 5001,
+        "isPrivate": true
+      }
+    }
+  ],
+  "databases": [],
+  "volumes": [
+    {
+      "name": "docling-cache",
+      "mountPath": "/app/cache",
+      "size": "10Gi"
+    }
+  ],
+  "cronjobs": [],
+  "workers": [],
+  "meta": {
+    "templateVersion": "1.0.0",
+    "templateName": "Railway Docling OCR Template",
+    "templateDescription": "Production-ready Docling OCR service with enterprise-grade security, authentication, and monitoring",
+    "templateTags": ["ocr", "document-processing", "ai", "security", "authentication"],
+    "templateAuthor": "Railway Community",
+    "templateRepository": "https://github.com/yourusername/railway-docling-template",
+    "minRailwayVersion": "2.0.0"
+  }
+}

@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+  # Caddy reverse proxy with authentication and security
+  caddy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docling-caddy
+    ports:
+      - "8080:8080"
+    environment:
+      # Authentication - loaded from .env file
+      CADDY_AUTHORIZATION: ${CADDY_AUTHORIZATION:-changeme-use-generate-password-script}
+      CADDY_USERNAME: ${CADDY_USERNAME:-admin}
+      CADDY_PASSWORD_HASH: ${CADDY_PASSWORD_HASH:-$$2a$$14$$Zkx19XLiW6VYouLHR5NmfOFU0z2GTNmpkT/5qqR7hx4IjWJPDhjvG}
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    networks:
+      - docling-network
+    depends_on:
+      docling-serve:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    volumes:
+      # Mount Caddyfile for live reloading during development
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Caddy data persistence
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Docling document processing service
+  docling-serve:
+    image: ds4sd/docling-serve:latest
+    container_name: docling-serve
+    environment:
+      # Docling configuration
+      ENABLE_UI: ${DOCLING_SERVE_ENABLE_UI:-1}
+      PORT: 5001
+      # Model configuration
+      USE_GPU: ${USE_GPU:-false}
+      # Performance tuning
+      WORKERS: ${DOCLING_WORKERS:-4}
+      MAX_REQUESTS: ${MAX_REQUESTS:-100}
+      # Document processing limits
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-104857600}  # 100MB
+      PROCESSING_TIMEOUT: ${PROCESSING_TIMEOUT:-300}
+    networks:
+      - docling-network
+    volumes:
+      # Cache directory for processed documents
+      - docling_cache:/app/cache
+      # Models directory
+      - docling_models:/app/models
+      # Temporary files
+      - docling_temp:/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Resource limits (adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  # Optional: Monitoring with Prometheus (uncomment to enable)
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: docling-prometheus
+  #   volumes:
+  #     - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - prometheus_data:/prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - docling-network
+  #   restart: unless-stopped
+
+  # Optional: Grafana for visualization (uncomment to enable)
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: docling-grafana
+  #   environment:
+  #     GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+  #     GF_INSTALL_PLUGINS: "redis-datasource"
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #     - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+  #   networks:
+  #     - docling-network
+  #   depends_on:
+  #     - prometheus
+  #   restart: unless-stopped
+
+networks:
+  docling-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  # Caddy volumes
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+  
+  # Docling volumes
+  docling_cache:
+    driver: local
+  docling_models:
+    driver: local
+  docling_temp:
+    driver: local
+  
+  # Monitoring volumes (if enabled)
+  # prometheus_data:
+  #   driver: local
+  # grafana_data:
+  #   driver: local

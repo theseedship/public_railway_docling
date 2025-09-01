@@ -1,34 +1,281 @@
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/docling-ocr-anything?referralCode=Z1xivh)
+[![Security Scan](https://github.com/yourusername/railway-docling-template/actions/workflows/security.yml/badge.svg)](https://github.com/yourusername/railway-docling-template/actions/workflows/security.yml)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://hub.docker.com/r/ds4sd/docling-serve)
 
-# Usage
-## Production
-Call API with Header: `Authorization: Bearer &lt; CADDY.CADDY_AUTHORIZATION&gt;`
-The CADDY_AUTHORIZATION is randomly generated, get it from the Caddy's environment variable
-Visit documentation `/docs` or `/scalar`
-## Using included UI
-Configure `DOCLING_SERVE_ENABLE_UI=1` in Docling
-Try it out with Gradio UI at `/ui`
+# 🚀 Railway Docling OCR Template - Enterprise Ready
 
+Production-ready, secure deployment template for [Docling](https://github.com/DS4SD/docling) - a powerful document processing tool that parses PDFs, DOCX, PPTX, images, and audio files with advanced OCR capabilities, Visual Language Models, and ASR for audio transcription.
 
-# Deploy and Host Docling - OCR anything on Railway
-Docling is a powerful document processing tool that parses diverse formats including PDF, DOCX, PPTX, images, and audio files. It features advanced PDF understanding with layout analysis, table extraction, and formula recognition, while offering seamless integrations with popular AI frameworks and local execution for sensitive data.
+## ✨ Features
 
+### 🔒 Enterprise Security
+- **Dual Authentication**: Bearer tokens for API, Basic Auth for UI
+- **Security Headers**: HSTS, CSP, X-Frame-Options, and more
+- **Rate Limiting**: Configurable per-endpoint and global limits
+- **Non-root Containers**: Enhanced container security
+- **Automated Security Scanning**: GitHub Actions workflows
 
-## About Hosting Docling - OCR anything
-Hosting Docling provides a comprehensive document processing service capable of handling multiple file formats through advanced parsing techniques. The deployment includes OCR capabilities for scanned documents, Visual Language Model support, and ASR for audio transcription. With its unified DoclingDocument format and various export options (Markdown, HTML, JSON), Docling serves as a versatile document intelligence solution. The service can run locally for air-gapped environments or be deployed as a scalable API, making it ideal for enterprise document processing workflows and AI-powered applications.
+### 📄 Document Processing
+- **Multi-format Support**: PDF, DOCX, PPTX, images, audio files
+- **Advanced OCR**: Layout analysis, table extraction, formula recognition
+- **Visual Language Models**: Deep document understanding
+- **Audio Transcription**: ASR capabilities for audio files
+- **Export Options**: Markdown, HTML, JSON formats
 
-## Common Use Cases
-- **Document Intelligence Pipeline**: Extract structured data from PDFs, invoices, reports, and forms for automated processing and analysis
-- **Multi-format Content Ingestion**: Convert diverse document types (PDFs, Office files, images, audio) into AI-ready formats for RAG systems and chatbots
-- **Enterprise Document Processing**: Parse complex technical documents, research papers, and legal contracts while preserving tables, formulas, and formatting
+### 🏗️ Production Ready
+- **Health Checks**: Automated monitoring endpoints
+- **Zero-downtime Deployments**: Rolling updates with health validation
+- **Resource Management**: Configurable CPU/memory limits
+- **Logging & Monitoring**: Structured JSON logging
+- **Docker Compose**: Local development environment
 
-## Dependencies for Docling - OCR anything Hosting
-None
+## 🚀 Quick Start
 
-### Deployment Dependencies
-None
+### Deploy to Railway (Recommended)
 
-## Why Deploy Docling - OCR anything on Railway?
-Railway is a singular platform to deploy your infrastructure stack. Railway will host your infrastructure so you don't have to deal with configuration, while allowing you to vertically and horizontally scale it.
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/docling-ocr-anything?referralCode=Z1xivh)
 
-By deploying Docling - OCR anything on Railway, you are one step closer to supporting a complete full-stack application with minimal burden. Host your servers, databases, AI agents, and more on Railway.
+Click the button above and Railway will:
+1. Fork this repository to your GitHub account
+2. Deploy the services automatically
+3. Generate secure credentials
+4. Provide you with a public URL
+
+### Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/railway-docling-template.git
+   cd railway-docling-template
+   ```
+
+2. **Generate secure credentials**
+   ```bash
+   chmod +x scripts/generate-password.sh
+   ./scripts/generate-password.sh
+   ```
+
+3. **Create environment file**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your generated credentials
+   ```
+
+4. **Start services**
+   ```bash
+   docker-compose up -d
+   ```
+
+5. **Validate deployment**
+   ```bash
+   ./scripts/validate-deployment.sh --url http://localhost:8080
+   ```
+
+## 📖 Usage
+
+### API Authentication
+
+Call API endpoints with Bearer token authentication:
+
+```bash
+# Set your token (get from Railway dashboard or .env file)
+export TOKEN="your-bearer-token-here"
+
+# Upload and process a document
+curl -X POST https://your-app.railway.app/v1/convert \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@document.pdf" \
+  -F "output_format=markdown"
+```
+
+### UI Access
+
+1. Navigate to `https://your-app.railway.app/ui`
+2. Enter username and password (configured in environment variables)
+3. Use the Gradio interface for document processing
+
+### Documentation
+
+- **API Documentation**: `https://your-app.railway.app/docs`
+- **Interactive API**: `https://your-app.railway.app/scalar`
+- **OpenAPI Spec**: `https://your-app.railway.app/openapi.json`
+
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `CADDY_AUTHORIZATION` | Bearer token for API auth | Auto-generated | Yes |
+| `CADDY_USERNAME` | Basic auth username | `admin` | Yes |
+| `CADDY_PASSWORD_HASH` | Bcrypt password hash | - | Yes |
+| `DOCLING_SERVE_ENABLE_UI` | Enable Gradio UI | `1` | No |
+| `LOG_LEVEL` | Logging verbosity | `INFO` | No |
+
+See [.env.example](.env.example) for complete configuration options.
+
+### Security Configuration
+
+#### Generate Credentials
+
+```bash
+# Interactive credential generator
+./scripts/generate-password.sh
+
+# Options:
+# 1. Generate password hash only
+# 2. Generate API token only
+# 3. Generate both (recommended)
+# 4. Generate random password with hash
+```
+
+#### Rate Limiting
+
+Default rate limits (configurable in Caddyfile):
+- **Global**: 1000 requests/minute
+- **API per IP**: 100 requests/minute
+- **Docs per IP**: 30 requests/minute
+
+#### Security Headers
+
+All responses include:
+- HSTS with preloading
+- CSP policy
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- Custom Referrer and Permissions policies
+
+## 📊 Monitoring
+
+### Health Checks
+
+- **Basic Health**: `GET /health` - Returns 200 if Caddy is running
+- **Ready Check**: `GET /ready` - Validates backend connectivity
+- **Metrics**: Available via Caddy's metrics endpoint
+
+### Logging
+
+Structured JSON logging to stdout with configurable levels:
+- `DEBUG`: Verbose debugging information
+- `INFO`: Standard operational logs
+- `WARN`: Warning messages
+- `ERROR`: Error conditions
+
+### Validation Script
+
+Run comprehensive deployment validation:
+
+```bash
+./scripts/validate-deployment.sh \
+  --url https://your-app.railway.app \
+  --token your-api-token
+```
+
+## 🛡️ Security
+
+This template implements enterprise-grade security. See [SECURITY.md](SECURITY.md) for:
+- Security features and best practices
+- Vulnerability reporting process
+- Compliance standards
+- Security audit checklist
+
+### Key Security Features
+
+1. **Authentication**: Dual-layer with Bearer tokens and Basic Auth
+2. **Container Security**: Non-root user, Alpine base, read-only configs
+3. **Network Security**: Rate limiting, security headers, CORS control
+4. **Automated Scanning**: Daily vulnerability scans via GitHub Actions
+
+## 🧪 Testing
+
+### Local Testing
+
+```bash
+# Run security validation
+docker-compose up -d
+./scripts/validate-deployment.sh
+
+# Run specific tests
+docker-compose exec caddy caddy validate --config /etc/caddy/Caddyfile
+```
+
+### CI/CD Pipeline
+
+GitHub Actions workflows included:
+- **Security scanning**: Container vulnerabilities, dependencies, secrets
+- **Configuration validation**: Syntax checking, security headers
+- **Automated testing**: Health checks, authentication, rate limiting
+
+## 📚 API Examples
+
+### Convert PDF to Markdown
+
+```bash
+curl -X POST https://your-app.railway.app/v1/convert \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@document.pdf" \
+  -F "output_format=markdown"
+```
+
+### Process Image with OCR
+
+```bash
+curl -X POST https://your-app.railway.app/v1/ocr \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "image=@scan.jpg"
+```
+
+### Extract Tables from Document
+
+```bash
+curl -X POST https://your-app.railway.app/v1/extract/tables \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@report.pdf"
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run security validation
+5. Submit a pull request
+
+## 📝 License
+
+This template is MIT licensed. See [LICENSE](LICENSE) file for details.
+
+Docling is licensed under [MIT License](https://github.com/DS4SD/docling/blob/main/LICENSE).
+
+## 🆘 Support
+
+- **Documentation**: [Full documentation](https://github.com/yourusername/railway-docling-template/wiki)
+- **Issues**: [GitHub Issues](https://github.com/yourusername/railway-docling-template/issues)
+- **Security**: See [SECURITY.md](SECURITY.md) for reporting vulnerabilities
+- **Railway Support**: [Railway Documentation](https://docs.railway.app)
+
+## 🎯 Roadmap
+
+- [ ] JWT token authentication support
+- [ ] Multi-tenant isolation
+- [ ] S3/Cloud storage integration
+- [ ] Webhook notifications
+- [ ] Advanced queue management
+- [ ] Prometheus metrics endpoint
+- [ ] OpenTelemetry tracing
+
+## 🏆 Credits
+
+- [Docling](https://github.com/DS4SD/docling) by IBM Research
+- [Caddy](https://caddyserver.com) for reverse proxy
+- [Railway](https://railway.app) for hosting platform
+
+---
+
+**Version**: 1.0.0 | **Last Updated**: January 2024
+
+Made with ❤️ for the Railway community

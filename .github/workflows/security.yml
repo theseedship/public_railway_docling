@@ -1,0 +1,323 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  # Container security scanning with Trivy
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: |
+          docker build -t docling-caddy:test .
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docling-caddy:test'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '1'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Scan Docling base image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ds4sd/docling-serve:latest'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'  # Don't fail on base image issues
+
+  # Dependency scanning
+  dependency-check:
+    name: Dependency Security Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'railway-docling-template'
+          path: '.'
+          format: 'ALL'
+          args: >
+            --enableRetired
+            --enableExperimental
+      
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: dependency-check-report
+          path: reports/
+
+  # Configuration security check
+  config-security:
+    name: Configuration Security Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check for hardcoded secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+      
+      - name: Validate Caddyfile syntax
+        run: |
+          docker run --rm -v $PWD/Caddyfile:/etc/caddy/Caddyfile:ro \
+            caddy:alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+      
+      - name: Check for sensitive data in configs
+        run: |
+          # Check for potential secrets in configuration files
+          echo "Checking for hardcoded passwords..."
+          if grep -r "password\|secret\|token\|key" --include="*.yml" --include="*.yaml" --include="*.json" --exclude-dir=".github" . | grep -v "CADDY_PASSWORD_HASH\|CADDY_AUTHORIZATION\|example\|changeme"; then
+            echo "⚠️  Warning: Potential secrets found in configuration files"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets found"
+
+  # Security headers validation
+  headers-check:
+    name: Security Headers Validation
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Start services
+        run: |
+          # Use default test credentials
+          export CADDY_AUTHORIZATION=test-token-for-ci
+          export CADDY_USERNAME=admin
+          export CADDY_PASSWORD_HASH='$2a$14$Zkx19XLiW6VYouLHR5NmfOFU0z2GTNmpkT/5qqR7hx4IjWJPDhjvG'
+          
+          docker-compose up -d
+          
+          # Wait for services to be ready
+          echo "Waiting for services to start..."
+          sleep 30
+          
+          # Check if services are healthy
+          docker-compose ps
+      
+      - name: Test security headers
+        run: |
+          # Check for security headers
+          headers=$(curl -s -I http://localhost:8080/health)
+          
+          echo "Checking security headers..."
+          
+          # Check each required header
+          required_headers=(
+            "X-Frame-Options"
+            "X-Content-Type-Options"
+            "Content-Security-Policy"
+            "Referrer-Policy"
+          )
+          
+          for header in "${required_headers[@]}"; do
+            if echo "$headers" | grep -qi "$header"; then
+              echo "✅ $header is present"
+            else
+              echo "❌ $header is missing"
+              exit 1
+            fi
+          done
+          
+          echo "✅ All security headers are present"
+      
+      - name: Test authentication
+        run: |
+          # Test that API endpoint requires authentication
+          response=$(curl -s -w "\n%{http_code}" http://localhost:8080/v1/test)
+          http_code=$(echo "$response" | tail -n1)
+          
+          if [ "$http_code" = "401" ]; then
+            echo "✅ API authentication is required"
+          else
+            echo "❌ API endpoint accessible without auth (HTTP $http_code)"
+            exit 1
+          fi
+          
+          # Test that UI endpoint requires authentication
+          response=$(curl -s -w "\n%{http_code}" http://localhost:8080/ui)
+          http_code=$(echo "$response" | tail -n1)
+          
+          if [ "$http_code" = "401" ]; then
+            echo "✅ UI authentication is required"
+          else
+            echo "❌ UI endpoint accessible without auth (HTTP $http_code)"
+            exit 1
+          fi
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose down -v
+
+  # SAST scanning with CodeQL
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: 'javascript'
+          queries: security-and-quality
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # License compliance check
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check licenses
+        uses: fossas/fossa-action@main
+        continue-on-error: true
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
+
+  # Security policy validation
+  security-policy:
+    name: Security Policy Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate SECURITY.md exists
+        run: |
+          if [ ! -f "SECURITY.md" ]; then
+            echo "❌ SECURITY.md file is missing"
+            exit 1
+          fi
+          echo "✅ SECURITY.md exists"
+      
+      - name: Validate security scripts
+        run: |
+          # Check that security scripts are executable
+          chmod +x scripts/*.sh
+          
+          # Validate script syntax
+          for script in scripts/*.sh; do
+            if bash -n "$script"; then
+              echo "✅ $script syntax is valid"
+            else
+              echo "❌ $script has syntax errors"
+              exit 1
+            fi
+          done
+
+  # Security report
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [container-scan, dependency-check, config-security, headers-check]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Generate security summary
+        run: |
+          echo "# Security Scan Summary" > security-report.md
+          echo "" >> security-report.md
+          echo "Date: $(date)" >> security-report.md
+          echo "Branch: ${{ github.ref_name }}" >> security-report.md
+          echo "Commit: ${{ github.sha }}" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "## Scan Results" >> security-report.md
+          echo "" >> security-report.md
+          
+          # Add job status
+          echo "- Container Scan: ${{ needs.container-scan.result }}" >> security-report.md
+          echo "- Dependency Check: ${{ needs.dependency-check.result }}" >> security-report.md
+          echo "- Config Security: ${{ needs.config-security.result }}" >> security-report.md
+          echo "- Headers Check: ${{ needs.headers-check.result }}" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "## Recommendations" >> security-report.md
+          echo "" >> security-report.md
+          echo "1. Review and fix any critical vulnerabilities" >> security-report.md
+          echo "2. Update dependencies regularly" >> security-report.md
+          echo "3. Rotate credentials periodically" >> security-report.md
+          echo "4. Monitor security advisories" >> security-report.md
+      
+      - name: Upload security report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-report
+          path: security-report.md
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });

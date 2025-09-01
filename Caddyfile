@@ -1,21 +1,228 @@
+{
+    # Global options
+    servers {
+        # Enable HTTP/2 and HTTP/3
+        protocols h1 h2 h3
+        
+        # Timeouts for better performance
+        timeouts {
+            read_body 30s
+            read_header 10s
+            write 30s
+            idle 2m
+        }
+        
+        # Max request body size (100MB)
+        max_header_size 100MB
+    }
+    
+    # Logging configuration
+    log {
+        output stdout
+        format json
+        level {$LOG_LEVEL:INFO}
+    }
+}
+
 :8080 {
-    @v1 {
+    # Security Headers
+    header {
+        # HSTS - Force HTTPS for 1 year
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        
+        # Prevent clickjacking
+        X-Frame-Options "DENY"
+        
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        
+        # XSS Protection (for older browsers)
+        X-XSS-Protection "1; mode=block"
+        
+        # Referrer Policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # Permissions Policy (formerly Feature Policy)
+        Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+        
+        # Content Security Policy
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        
+        # Remove server header
+        -Server
+        
+        # Add custom server header
+        X-Powered-By "Railway-Docling-Secure"
+    }
+    
+    # Rate limiting - Global (requires caddy-ratelimit plugin)
+    # Uncomment when using a Caddy build with rate_limit module
+    # @rate_limit_global {
+    #     not path /health
+    #     not path /ready
+    # }
+    # rate_limit @rate_limit_global {
+    #     zone global {
+    #         key static
+    #         events 1000
+    #         window 1m
+    #     }
+    # }
+    
+    # Rate limiting - Per IP for API endpoints
+    # @api_endpoints {
+    #     path /v1/*
+    # }
+    # rate_limit @api_endpoints {
+    #     zone per_ip {
+    #         key {remote_host}
+    #         events 100
+    #         window 1m
+    #     }
+    # }
+    
+    # Health check endpoint (no auth required)
+    @health {
+        path /health
+    }
+    handle @health {
+        respond "OK" 200
+    }
+    
+    # Ready check endpoint (checks backend connectivity)
+    @ready {
+        path /ready
+    }
+    handle @ready {
+        reverse_proxy docling-serve:5001 {
+            health_uri /health
+            health_interval 10s
+            health_timeout 5s
+        }
+    }
+    
+    # API v1 endpoints with Bearer token authentication
+    @api_v1 {
         path /v1/*
     }
-    @auth {
+    
+    @api_auth {
         header Authorization "Bearer {$CADDY_AUTHORIZATION}"
         path /v1/*
     }
-    route @auth {
+    
+    # Handle authenticated API requests
+    handle @api_auth {
+        # Add security headers for API responses
+        header {
+            X-Content-Type-Options "nosniff"
+            X-API-Version "1.0"
+            Cache-Control "no-store, no-cache, must-revalidate, private"
+        }
+        
+        # Request size limit for API (50MB)
+        request_body {
+            max_size 50MB
+        }
+        
+        reverse_proxy docling-serve:5001 {
+            # Load balancing
+            lb_policy round_robin
+            lb_try_duration 30s
+            
+            # Health checks
+            health_uri /health
+            health_interval 30s
+            health_timeout 5s
+            
+            # Add request headers
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+    
+    # Reject unauthorized API requests
+    handle @api_v1 {
+        header Content-Type "application/json"
+        respond `{"error": "unauthorized", "message": "Invalid or missing Bearer token in Authorization header"}` 401
+    }
+    
+    # Documentation endpoints (public access with rate limiting)
+    @docs {
+        path /docs /docs/* /scalar /scalar/* /openapi.json
+    }
+    handle @docs {
+        # Rate limiting for docs (requires caddy-ratelimit plugin)
+        # rate_limit {
+        #     zone docs {
+        #         key {remote_host}
+        #         events 30
+        #         window 1m
+        #     }
+        # }
         reverse_proxy docling-serve:5001
     }
-    route @v1 {
-        respond "Unauthorized" 401
+    
+    # UI endpoint with Basic Authentication
+    @ui {
+        path /ui /ui/*
     }
-    route {
+    handle @ui {
         basicauth {
             {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
         }
+        
+        # UI-specific security headers
+        header {
+            X-Frame-Options "SAMEORIGIN"
+            Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: wss: https:; img-src * data: blob:; media-src * data: blob:;"
+        }
+        
         reverse_proxy docling-serve:5001
+    }
+    
+    # All other endpoints with Basic Authentication
+    handle {
+        basicauth {
+            {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
+        }
+        
+        # Request size limit (100MB for document processing)
+        request_body {
+            max_size 100MB
+        }
+        
+        reverse_proxy docling-serve:5001 {
+            # Load balancing
+            lb_policy round_robin
+            lb_try_duration 30s
+            
+            # Health checks
+            health_uri /health
+            health_interval 30s
+            health_timeout 5s
+            
+            # Add request headers
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+    
+    # Custom error pages
+    handle_errors {
+        @404 expression {http.error.status_code} == 404
+        respond @404 "Not Found - The requested resource does not exist" 404
+        
+        @500 expression {http.error.status_code} >= 500
+        respond @500 "Internal Server Error - Please try again later" 500
+        
+        respond "Error {http.error.status_code}" {http.error.status_code}
+    }
+    
+    # Logging
+    log {
+        output stdout
+        format json
+        level {$LOG_LEVEL:INFO}
     }
 }
