@@ -1,10 +1,38 @@
 # 🚀 Railway Docling Template - AI Document Processing Made Easy
 
-Transform any document into structured data with enterprise-grade security. This Railway template deploys [IBM's Docling](https://github.com/DS4SD/docling) - a powerful AI that can read PDFs, images, Word docs, PowerPoints, and even audio files with OCR, layout analysis, and transcription capabilities.
-
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template/docling-ocr-anything?referralCode=Z1xivh)
 
-**Perfect for:** Document automation, content extraction, OCR workflows, data processing pipelines, and AI applications that need to understand documents.
+## 🇬🇧 English
+
+[Docling](https://github.com/DS4SD/docling) is an open-source framework for multimodal document processing, enabling extraction, transformation, and analysis of complex documents (PDFs, images, PowerPoints, Word docs, and more).
+
+### Why Choose Our Railway Template?
+
+- **🔐 Built-in Authentication & IP Filtering**: Protect your instance with access control and IP allowlists
+- **⚡ Optimized Performance**: Model caching for faster startup + Gzip compression (70% bandwidth reduction)
+- **💰 Cost Optimization**: Runs in Railway's private network, avoiding public exposure and inter-service traffic costs
+- **🛡️ Enhanced Security**: No need to make services public, significantly reducing attack surface
+- **🌱 Digital Sobriety**: Use sleep mode and adjust resources for responsible management
+
+**Perfect for:** Document automation, content extraction, OCR workflows, data processing pipelines, and AI applications.
+
+---
+
+## 🇫🇷 Français
+
+[Docling](https://github.com/DS4SD/docling) est un framework open-source pour le traitement documentaire multimodal, permettant l'extraction, la transformation et l'analyse de documents complexes (PDF, images, PowerPoint, Word, etc.).
+
+### Pourquoi Choisir Notre Template Railway ?
+
+- **🔐 Authentification et filtrage IP intégrés** : Sécurisez votre instance avec contrôle d'accès et listes d'IP autorisées
+- **⚡ Performances optimisées** : Cache des modèles pour démarrage rapide + compression Gzip (-70% bande passante)
+- **💰 Optimisation des coûts** : Réseau privé Railway = pas d'exposition publique ni frais inter-services
+- **🛡️ Sécurité renforcée** : Services non publics = surface d'attaque considérablement réduite
+- **🌱 Sobriété numérique** : Mode veille et ajustement des ressources pour une gestion responsable
+
+**Idéal pour :** Automatisation documentaire, extraction de contenu, workflows OCR, pipelines de traitement de données, applications IA.
+
+---
 
 ## ✨ What Can This Do?
 
@@ -162,18 +190,24 @@ Your Railway app is configured through environment variables. Here are the key o
 | UI Enable | `DOCLING_SERVE_ENABLE_UI` | Show web interface | `1` (enabled) |
 | Logging | `LOG_LEVEL` | How much to log | `INFO` |
 
-### 🔄 Password Management
+### 🔄 Password Management / Gestion des mots de passe
 
-**To change your password:**
+**🇬🇧 To change your password:**
 1. Go to Railway dashboard → Variables
 2. **Delete or empty** `CADDY_PASSWORD_HASH`
 3. **Set/update** `PASSWORD` with your new password
 4. Redeploy → new hash generated automatically!
 
-**How it works:**
-- If only `PASSWORD` is set → generates hash at startup
-- If only `CADDY_PASSWORD_HASH` is set → uses existing hash
-- If both are set → hash takes priority (prevents accidental changes)
+**🇫🇷 Pour changer votre mot de passe :**
+1. Allez dans Railway dashboard → Variables
+2. **Supprimez ou videz** `CADDY_PASSWORD_HASH`
+3. **Définissez/mettez à jour** `PASSWORD` avec votre nouveau mot de passe
+4. Redéployez → le hash est généré automatiquement !
+
+**How it works / Comment ça marche :**
+- `PASSWORD` only / seul → generates hash at startup / génère le hash au démarrage
+- `CADDY_PASSWORD_HASH` only / seul → uses existing hash / utilise le hash existant
+- Both / Les deux → hash takes priority / le hash a la priorité
 
 ### Optional Security Features
 
@@ -183,12 +217,6 @@ ENABLE_IP_FILTER=true
 ALLOWED_IPS=192.168.1.0/24,10.0.0.5/32
 ```
 
-**Custom Rate Limits**: Prevent abuse
-```env  
-RATE_LIMIT_GLOBAL=1000       # Requests per minute globally
-RATE_LIMIT_API_PER_IP=100    # API requests per IP per minute
-RATE_LIMIT_DOCS_PER_IP=30    # Docs requests per IP per minute
-```
 
 ## 🚀 Railway-Specific Optimizations
 
@@ -227,10 +255,6 @@ Every response includes:
 - **X-Frame-Options**: Blocks clickjacking
 - **X-Content-Type-Options**: Prevents MIME sniffing
 
-### Rate Limiting
-- **Global**: 1000 requests/minute
-- **Per-IP API**: 100 requests/minute  
-- **Documentation**: 30 requests/minute per IP
 
 ### Container Security  
 - **Non-root user**: Containers run unprivileged
