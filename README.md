@@ -1,6 +1,6 @@
 # 🚀 Railway Docling Template
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/szxF2m?referralCode=VH4_Hp&utm_medium=integration&utm_source=template&utm_campaign=generic)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/Dxu7RY?referralCode=VH4_Hp&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 ## 🇬🇧 English
 [Docling](https://github.com/DS4SD/docling) is an AI framework for document processing (PDFs, images, PowerPoint, Word) with OCR, table extraction, and format conversion.
