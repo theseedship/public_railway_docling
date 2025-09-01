@@ -1,0 +1,18 @@
+:8080 {
+    @v1 {
+        path /v1/*
+    }
+    @auth {
+        header Authorization "Bearer {$CADDY_AUTHORIZATION}"
+        path /v1/*
+    }
+    route @auth {
+        reverse_proxy docling:5001
+    }
+    route @v1 {
+        respond "Unauthorized" 401
+    }
+    route {
+        reverse_proxy docling:5001
+    }
+}
