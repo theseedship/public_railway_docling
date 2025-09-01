@@ -1,0 +1,82 @@
+:{$PORT:8080} {
+    # Health check endpoint (no auth required)
+    @health {
+        path /health
+    }
+    handle @health {
+        respond "OK" 200
+    }
+    
+    # Ready check endpoint
+    @ready {
+        path /ready
+    }
+    handle @ready {
+        respond "Ready - Standalone Mode" 200
+    }
+    
+    # API v1 endpoints with Bearer token authentication
+    @api_v1 {
+        path /v1/*
+    }
+    
+    @api_auth {
+        header Authorization "Bearer {$CADDY_AUTHORIZATION}"
+        path /v1/*
+    }
+    
+    # Handle authenticated API requests
+    handle @api_auth {
+        header {
+            X-Content-Type-Options "nosniff"
+            X-API-Version "1.0"
+        }
+        respond "API endpoint ready - Configure docling-serve URL in Railway" 200
+    }
+    
+    # Reject unauthorized API requests
+    handle @api_v1 {
+        header Content-Type "application/json"
+        respond `{"error": "unauthorized", "message": "Invalid or missing Bearer token in Authorization header"}` 401
+    }
+    
+    # Documentation endpoints (public)
+    @docs {
+        path /docs /docs/* /scalar /scalar/* /openapi.json
+    }
+    handle @docs {
+        respond "Documentation will be available when docling-serve is connected" 200
+    }
+    
+    # UI endpoint with Basic Authentication
+    @ui {
+        path /ui /ui/*
+    }
+    handle @ui {
+        basicauth {
+            {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
+        }
+        respond "UI will be available when docling-serve is connected. Username: {$CADDY_USERNAME}" 200
+    }
+    
+    # Root with info
+    handle {
+        respond "Railway Docling Template - Standalone Mode
+        
+Available endpoints:
+- /health - Health check
+- /ready - Ready check
+- /ui - UI (requires basic auth)
+- /v1/* - API (requires bearer token)
+- /docs - Documentation
+
+To enable full functionality:
+1. Deploy docling-serve as a separate Railway service
+2. Update Caddyfile to proxy to docling-serve
+3. Set DOCLING_URL environment variable
+
+Current Auth:
+- Username: {$CADDY_USERNAME}
+- Bearer configured: {$CADDY_AUTHORIZATION:not_set}" 200
+    }
+}
