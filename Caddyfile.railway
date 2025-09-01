@@ -37,7 +37,7 @@
     handle @ready {
         reverse_proxy docling-serve:5001 {
             health_uri /health
-            health_interval 10s
+            health_interval 60s
             health_timeout 5s
         }
     }
@@ -61,7 +61,6 @@
         }
         
         reverse_proxy docling-serve:5001 {
-            header_up X-Forwarded-For {remote_host}
             header_up X-Real-IP {remote_host}
         }
     }
@@ -85,7 +84,7 @@
         path /ui /ui/*
     }
     handle @ui {
-        basicauth {
+        basic_auth {
             {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
         }
         
@@ -122,12 +121,11 @@
     
     # All other endpoints with Basic Authentication
     handle {
-        basicauth {
+        basic_auth {
             {$CADDY_USERNAME} {$CADDY_PASSWORD_HASH}
         }
         
         reverse_proxy docling-serve:5001 {
-            header_up X-Forwarded-For {remote_host}
             header_up X-Real-IP {remote_host}
         }
     }
