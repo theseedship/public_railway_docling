@@ -1,0 +1,43 @@
+# Git files
+.git
+.gitignore
+
+# Documentation
+*.md
+LICENSE
+
+# Scripts (not needed in container)
+scripts/
+
+# GitHub workflows
+.github/
+
+# Development files
+docker-compose.yml
+.env
+.env.example
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Disabled workflow
+*.disabled
+
+# Node modules (if any)
+node_modules/
+
+# Python files (if any)
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs
+*.log
