@@ -1,0 +1,45 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": null,
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "variables": {
+    "PASSWORD": {
+      "description": "Password for Basic Auth UI access (will be hashed automatically). To change: delete CADDY_PASSWORD_HASH and set new PASSWORD",
+      "required": false
+    },
+    "CADDY_AUTHORIZATION": {
+      "description": "Bearer token for API authentication (/v1/* endpoints). Generate with: openssl rand -hex 32",
+      "required": true,
+      "default": "${{secret(32)}}"
+    },
+    "CADDY_USERNAME": {
+      "description": "Username for Basic Auth UI access",
+      "required": false,
+      "default": "admin"
+    },
+    "ENABLE_IP_FILTER": {
+      "description": "Enable IP-based access control (true/false)",
+      "required": false,
+      "default": "false"
+    },
+    "ALLOWED_IPS": {
+      "description": "Comma-separated list of allowed IPs in CIDR format (e.g., 192.168.1.0/24,10.0.0.5/32)",
+      "required": false,
+      "default": "0.0.0.0/0"
+    },
+    "PORT": {
+      "description": "Port for the Caddy server (Railway sets this automatically)",
+      "required": false,
+      "default": "8080"
+    }
+  }
+}

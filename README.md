@@ -48,13 +48,28 @@ docker-compose up -d
 
 ## 🔐 First Time Setup & Authentication
 
-When Railway deploys your app, you'll get **two ways to access it**:
+Railway will prompt you to set authentication variables. You have **two options**:
 
-### 🌐 Web Interface (Easy Start)
+### Option 1: Simple Password (Recommended for New Users)
+Just set a `PASSWORD` and Railway handles the rest:
+```env
+PASSWORD=your-secure-password
+CADDY_USERNAME=admin  # optional, defaults to 'admin'
+```
+The password hash is generated automatically at startup! 🎉
+
+### Option 2: Advanced Setup (For Existing Deployments)
+If you already have a hash or want more control:
+```env
+CADDY_PASSWORD_HASH=$2a$14$your-generated-hash-here
+CADDY_USERNAME=admin
+```
+
+### 🌐 Web Interface Access
 1. Go to `https://your-app-name.railway.app/ui`
 2. Login with:
-   - **Username**: `admin` 
-   - **Password**: Check your Railway environment variables for `CADDY_PASSWORD_HASH` - [see auth troubleshooting](#-authentication-troubleshooting) below
+   - **Username**: `admin` (or your custom username)
+   - **Password**: The password you set (NOT the hash!)
 
 ### 🔌 API Access (For Developers)
 ```bash
@@ -138,11 +153,27 @@ Your Railway app is configured through environment variables. Here are the key o
 
 | Setting | Variable | Description | Default |
 |---------|----------|-------------|---------|
+| Password | `PASSWORD` | Your password (auto-hashed at startup) | - |
+| Password Hash | `CADDY_PASSWORD_HASH` | Pre-generated hash (advanced) | - |
 | API Token | `CADDY_AUTHORIZATION` | Bearer token for API access | Auto-generated |
 | Username | `CADDY_USERNAME` | Login username for `/ui` | `admin` |
-| Password | `CADDY_PASSWORD_HASH` | Hashed password for `/ui` | Auto-generated |
+| IP Filter | `ENABLE_IP_FILTER` | Enable IP restrictions | `false` |
+| Allowed IPs | `ALLOWED_IPS` | IPs that can access (CIDR) | `0.0.0.0/0` |
 | UI Enable | `DOCLING_SERVE_ENABLE_UI` | Show web interface | `1` (enabled) |
 | Logging | `LOG_LEVEL` | How much to log | `INFO` |
+
+### 🔄 Password Management
+
+**To change your password:**
+1. Go to Railway dashboard → Variables
+2. **Delete or empty** `CADDY_PASSWORD_HASH`
+3. **Set/update** `PASSWORD` with your new password
+4. Redeploy → new hash generated automatically!
+
+**How it works:**
+- If only `PASSWORD` is set → generates hash at startup
+- If only `CADDY_PASSWORD_HASH` is set → uses existing hash
+- If both are set → hash takes priority (prevents accidental changes)
 
 ### Optional Security Features
 

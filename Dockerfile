@@ -7,6 +7,11 @@ COPY Caddyfile /etc/caddy/Caddyfile.production
 # Use Railway config by default (optimized for Railway platform)
 COPY Caddyfile.railway /etc/caddy/Caddyfile
 
+# Copy and setup entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8080
 
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+# Use entrypoint for dynamic password hash generation
+ENTRYPOINT ["/entrypoint.sh"]
